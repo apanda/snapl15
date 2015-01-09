@@ -1,0 +1,122 @@
+\section{Formalizing the Mutable Data Plane}
+\label{sec:formal}
+The previous sections argued why a new approach to network verification is needed and briefly outlined what it might look like. \fixme{Here we present some
+early...}
+
+\subsection{Verification Problem}
+Prior work~\cite{popl:DeMilloLP77} has shown that precisely specifying the desired behavior of a program (or network) is hard. The lack of a precise specification
+is major problem for program and network verification. In this section we limit our verification efforts to Reachability invariants, which are both commonly used
+and universally applicable. We start by describing thee invairants.
+
+\subsubsection{Network Reachability}
+The primary function of networks is to allow hosts to communicate with each other. Reachabality, the property that a certain class of packets sent from host $A$ 
+can reach host $B$, and its converse, isolation, are fundamental to networks: all useful networks must satisfy some set of reachability properties and their
+verification is thus universally important. 
+
+We formally state these invariants using temporal logic. First, we define two relations: $Send(n, p)$ indicating some network entity (node) $n$ sent
+a packet $p$ (at some time), and $Recv(n, p)$ indicating node $n$ received packet $p$. Given these relations any reachability property can be expressed in 
+LTL (Linear Temporal Logic) as
+\begin{align*}
+\forall p\in \text{Packet}: Send(src, p) \land Predicate(p) \implies \Diamond(Recv(dest, p))
+\end{align*}
+This temporal logic statement says that a packet $p$ sent by $src$ which satisfies $Predicate$ is eventually received by $dest$.
+Similarly, isolation can be formally expressed by requiring that a packet sent by $src$, satisfying $Predicate$ is never received by $dest$:
+\begin{align*}
+\forall p\in \text{Packet}: Send(src, p) \land Predicate(p) \implies \Box(\neg Recv(dest, p))
+\end{align*}
+
+
+$Predicate$ in the definitions above is specified using the same abstractions used to specify network policies, \ie either in terms of packet
+header fields (source, destination, etc.) or in terms of the abstraction provided by a middlebox Oracle (\S\ref{sec:mbmodel}). For example, a property 
+saying no SSH traffic can reach a server $d$ can be expressed as
+\begin{align}
+\forall s\in \text{Node}: Send(s, p) \land ssh(p) \implies \Box(\neg Recv(d, p)) \label{eq:isossh}
+\end{align}
+
+where $ssh(p)$ returns true if an Oracle classifies the packet as belonging to an SSH connection.
+We reason about reachability and isolation properties assuming the Oracles are correct.
+Verifying the isolation property in Equation~\ref{eq:isossh} therefore requires answering the question:
+``assuming SSH traffic is correctly identified, can a packet belonging to an SSH connection reach $d$?''
+
+\subsection{Formalizing Middlebox Semantics}
+\begin{lstlisting}[caption={Model for an IDS},label=list:ids,captionpos=t,float,abovecaptionskip=-\medskipamount,
+                    numbers=left,
+                    morekeywords={oracle, model, when, default, state, forward}]
+oracle suspicious? (packet: Packet) : Boolean;
+
+
+model ids (n: Node, p: Packet) = {
+  when suspicious?(p) =>
+      forward {}
+  default =>
+      forward {p}
+}
+\end{lstlisting}
+
+\notepanda{I think we should cut this bit, or move it elsewhere}
+Along with reachability properties, verification also requires that we specify middleboxes. We expect programmers or network operators will specify middlebox
+models (which include both an oracle and a generic model) using a constrained programming language. Listing~\ref{list:ids} shows an example of such a specification
+for an intrusion detecion system (IDS). The IDS oracle provides one abstraction, \texttt{suspicious?}, defined in the first line. The abstract model is
+defined in Lines 4 -- 9 and uses this abstraction. First we check to see if the packet is suspicious (the Oracle's decision here might be based on what
+packets it has seen previously), and  drop the packet (Line 6) or forward the packet (Line 9) depending on the value returned by the Oracle.  
+\notepanda{End of where we would cut until}
+
+Next, we develop abstract semantics for middleboxes. We use these to reason about general properties (such as composition) that apply to all middleboxes. Our
+semantic model is defined over a potentially infinite set of packets, $P$.  We augment packets to include information about their location (\ie the middlebox or
+switch port). We also define the operator $\doteq$, such that $p_1 \doteq p_2$ implies that packets $p_1$ and $p_2$ are identical except for their location. 
+Finally, we use $P^*$ to represent the set of all (potentially unbounded) sequence of packets.
+
+We define a middlebox $m$, as a function $m\colon P\times P^* \to 2^P$ which takes a packet ($p\in P$) and a history ($h\in P^*$) of all the packets that have 
+previously been processed by $m$ and produces a (possibly empty) set of packets $m(p, h)$. Given this model a switch is a simple function for which 
+$m(p, h) \doteq \left\{p\right\}$. Similarly a simple firewall, $f$ (whose decision process is represented by $allowed$) can be expressed as
+\begin{align*}
+ f(p, h) = \begin{cases}
+    \left\{p'\right\}\ p' \doteq p & \mbox{if } allowed(p, h)\\
+    \left\{\right\} & otherwise
+ \end{cases}
+\end{align*}
+
+\subsection{Composing Middleboxes}
+Ideally, we would like to be able to reason about the network \emph{compositionally}, \ie the correctness of the network should follow from
+the correctness of smaller, simpler components. Compositional reasoning can reduce the cost of verification and enable incremental verification 
+of changes in the network. Compositionality has been important for making verification tractable in other domains, for instance the use of
+rely-guarantees~\cite{tse:MisraC81,ifip:Jones83}, was important for enabling verification of concurrent programs.
+
+We start by defining what it means to be able to compositionally verify a network. Let us
+define the union of two networks $N_1$ and $N_2$ in the natural way, \ie $N_1\cup N_2$ contains the union of all nodesand links in each of $N_1$ and $N_2$. 
+Consider two networks: $N_1$, where property $P_1$ holds (represented as $N_1\models P_1$); and $N_2$, where property $P_2$ holds. We can compose the proofs
+for properties $P_1$ and $P_2$ if and only if  both $P_1$ and $P_2$ hold for $N_1 \cup N_2$. More formally, we can verify properties $P_1$ and $P_2$ 
+compositionally for network $N$ if for any $N_1 \subset N$ and $N_2\subset N$
+\begin{align*}
+N_1 \models P_1,  N_2\models P_2\\
+\hline
+(N_1 \cup N_2) \models P_1\land P_2
+\end{align*}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.9\textwidth]{figures/rono_example.pdf}
+\caption{Example where networks are not composable with respect to reachability properties.}
+\label{fig:compose_fail}
+\end{figure}
+
+Generally, one cannot perform compositional verification of reachability properties. For instance, 
+consider the example in Figure~\ref{fig:compose_fail}. The cache in this example records all requests to and the corresponding responses from $S$.
+On receiving a new request,  the cache checks to see if it has previously recorded a response for this request, in which case it returns the saved response;
+otherwise the cached forwards the request, unmodified, to the firewall.
+ The firewall drops all requests sent from $A$ to $S$, but otherwise forwards all other requests and responses unmodified.
+In network $N_1$, $A$ can never receive a response from $S$ (thus is isolated). However in the composed network $N_1\cup N_2$, if $B$ sends a request $r$ and
+receives response $r'$ from $S$, then $A$ can also request $r$ and receive $r'$. 
+
+\subsubsection{Rest of Network Oblivious Middleboxes}
+There are an important subset of networks where compositional reasoning can be used to verify reachability properties. These networks contain only Rest-Of
+Network Oblivious middleboxes (\S\ref{sec:modelnet}), middleboxes whose behavior for a pair of hosts depends only on the traffic sent between these hosts.
+More formally, we define the restriction $h|_{(A, B)}$ of a packet history $h\in P^*$ to be the subsequence of $h$ containing only those packets that were
+sent between host $A$ and $B$. We define a middlebox $m$ to be RONO if and only if
+\begin{align*}
+f(p, h) = f(p, h|_{(A, B)}) &\ \  \forall p.src = A \land p.dest = B \text{   and}\\
+f(p, h) = f(p, h|_{(A, B)}) &\ \  \forall p.src = B \land p.dest = A
+\end{align*}
+
+Not all compositions of RONO middleboxes are themselves RONO. In~\cite{corr:PandaLASS14}, we have identified some conditions where a network of RONO middleboxes
+supports compositional verification.  

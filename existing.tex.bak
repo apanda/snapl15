@@ -1,0 +1,79 @@
+\section{Implications of State}
+\label{sec:stateful}
+\eat{
+\begin{outline}
+\1 Previous approaches bad
+    \2 Models cannot easily account for state
+    \2 Hard to use fuunctional and declarative stuff for stateful networks
+\1 Must resort to some form of model checking
+    \2 Not feasible
+        \3 Large code base
+        \3 Many middleboxes
+\end{outline}}
+\fixme{SDN inspired model}
+Lots of recent work in the verification community has tried to address the problem of verifying computer networks. Works including Header-Space
+Analysis (HSA)~\cite{kazemian2013real}, Veriflow~\cite{}, Frenetic~\cite{guha2013machine},  NetKAT~\cite{anderson2014netkat}, FlowLog~\cite{flowlog} have looked at
+verifying the correctness of networks. These works assume, informed by the early SDN literature, that the control-plane
+is implemented using a Turing machine, while the data plane comprises of a collection of relatively simple stateless switches. Any processing that
+cannot be performed by dataplane switches is handled by the controller. Switches
+are programmed by specifying a
+forwarding table, where each row specifies a match (indicating a class of packets to which an entry applies) and a set of actions applies to these packets.
+Switch actions are limited to forwarding packets (\ie send the packet a particular way), dropping packets (\ie choose to not forward packets) and
+some limited mutation of the
+packet header. On receiving a packet the switch uses the packet header to index the forwarding table and applies the set of actions specified.
+Matches and actions can only depend on the packet under consideration, \ie switches are stateless. Stateful processing in this model is implemented in the
+controllers.
+
+\fixme{HSA, Veriflow, ..., NetKAT models work on snapshots of state }
+\notepanda{Claim 1.5}
+Since the data plane is assumed to be stateless and simple, the existing work in network verification has focused on verifying properties in the data plane. The
+primary challenge for such verification is reasoning about the effect of composing potentially unbounded sequences of stateless switches. Verification tools
+including HSA~\cite{kazemian2013real}, Veriflow~\cite{khurshid2012veriflow}, Frenetic~\cite{guha2013machine} and NetKAT~\cite{anderson2014netkat} have adopted this
+tactic and take a snapshot of the data plane configuration and provide mechanisms to reason about verify properties on this snapshot.
+
+\fixme{Dataplanes stateful}
+In reality, network dataplanes are more complicated: they commonly include a variety of stateful elements called middleboxes. Middleboxes
+are dataplane elements implemented using general purpose computers (and programmed in C or other Turing complete languages) used to provide functionality not
+expressible in switches. Middleboxes are used to improve network performance, security and add new features. Implementing such features in the dataplane is
+essential for scalability: a datacenter network can have as many as 500k new flows every second~\cite{benson2010network} while a controller can only handle about
+$5000-8000$ new  flows a second~\cite{}. Middleboxes are both common in the network (a recent study~\cite{sherry2012making} reports as many middleboxes as routers
+in a network) and a common source of errors in the network~\cite{potharaju2013demystifying}: middlebox misconfigurations account for over $40\%$ of all major
+incidents in networks. Directly using tools like HSA and NetKAT in such stateful networks is untennable: the rate of churn is too great to scale verification
+in this manner. Further, naively extending these techniques to reason about state (instead of working on snapshots) renders their decision procedures undecidable.
+Decision procedures for these networks must include techniques to handle unbounded sequences of packets and the state resulting from them.
+
+\notepanda{Claim 8}
+\fixme{Declarative languages don't work}
+%% Start positive
+Declarative programming languages can be used to effectively express network policies Nlog~\cite{Nlog},
+Flowlog~\cite{flowlog}, NDLog~\cite{}, NetCore~\cite{monsanto2012compile}.
+They can also be used to describe configuration languages~\cite{Congresss}.
+These languages hide the control of the program, simplifying the programming task and allowing efficient interpretation and runtime checking.
+However, declarative languages loose their charm in the presence of side-effects to the state.
+Th
+The
+using declarative languages. These policies are then converted to flow tables that are installed on
+SDN switches or executed in the controller, examples of these proposals include Flowlog~\cite{flowlog}, NDLog~\cite{}, NetCore~\cite{monsanto2012compile}.
+The use of declarative languages in a mostly stateless network is aimed to aid verification and provide a natural way to express network policies. However,
+when account for state, verifying policies expressed in declarative languages is no simpler and is often undecidable. Furthermore, expressing policies that
+depend on mutable state using a declarative language can be hard for programmers. Language based approaches therefore provide no benefit either for verification
+or expressiveness when used with stateful datapaths.
+
+\fixme{Need new tools, requirements}
+Since existing tools cannot be used to verify stateful datapaths, we ask what is a suitable model for verifying properties about networks with middleboxes.
+Ideally such a model would allow us to tractably reason about networks with a wide range of middleboxes. This requires addressing several challenges:
+\notepanda{Claim 3 and 9 kind of}
+\begin{itemize}
+\item Extracting models from middlebox code is not simple. Common middleboxes are implemented in several 100000 lines of C code and extracting a model from
+this is challenging.
+\item The network is huge and might involve several 1000 switches and middleboxes. The properties being verified are global and we must reason about the
+combination of all these elements.
+\item The state of the network evolves over time, so finite state model checking must be extended to handle state changes. Alternately we must develop techniques
+to reason about unbounded sequences of packets.
+\item Specifying correctness exactly, in the presence of middleboxes can be hard: for instance certain middleboxes such as intrusion detection systems mark
+certain packets as suspicious. This marking however can depend on a complex set of conditions which might not be simple to specify (and might not be interesting
+for the verification problem).
+\end{itemize}
+
+In the next two sections we present an initial model for reasoning about networks with middleboxes, following which we provide a more general overview of
+verification challenges that need to be addressed for such networks.

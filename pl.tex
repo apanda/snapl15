@@ -1,0 +1,79 @@
+\section{Some Middlebox Misconfiguration Errors}
+
+A recent study in the network community indicates that 43\% of network failures occur due to misconfiguration errors~\cite{IMC:RJ13}.
+For example, \figref{Miss1} shows a simple misconfiguration error when a new proxy is connected to the network, thereby
+the proxy hides the source from the Firewall.
+As a result host $A$ is no longer isolated from $B$.
+\figref{LoadIDS} shows another bug which can happen when a new load-balancer is added in order to improve the network performance.
+Lets assume that the IDS limits the number of paths from some host $A$.
+If the load-balancer reroutes two packets from $A$ to different
+As a result packets from the same host can be rerouted to different intrusion detection systems.
+A remedy do this problem is to ensure that the load balancer uniquely route packets from the same source.
+\begin{figure}
+\caption{\label{fi:Miss1}%
+A Proxy which leads to violation of network isolation.}
+\end{figure}
+
+
+\begin{figure}
+\caption{\label{fi:LoadIDS}%
+A load-balancer inserted before intrusion detection systems which leads to violation of network isolation.}
+\end{figure}
+
+% \section{Compositional Verification}
+\section{Open Problems for Program Verification}
+\section{What Does This Mean for Us?}
+\label{sec:PL}
+
+In this section, we argue that middleboxes are interesting from program language and verification perspectives.
+In \secref{MidDefinition}, we define the semantics of middleboxes in a generic way.
+The problem of verification of verifying a network of middleboxes is addressed in \secref{Verification}.
+Finally, \secref{Comp} addresses the problem of compositional network verification.
+
+
+\subsection{The Verification Problem}
+\label{sec:Verification}
+The area of program verification has gone a long way from the seminal works of Floyd, Hoare, and Dijkstra.
+The biggest problem of program (and network) verification as already observed in \cite{popl:DeMilloLP77} is the absence of exact specification of what the system intends to do.
+For example, we do not see how to exactly formalize the correctness of middleboxes like Intrusion Detected System(IDS).
+
+\subsubsection{Network Isolation}
+The most important safety problem for networks is \textbf{network isolation}, i.e., prove the absence of
+paths between certain parts of the network.
+Network isolation comes in many flavors.
+The simplest form is requiring that certain hosts cannot send certain types of packets to certain hosts.
+For example, different virtual networks should be disconnected even when they reside in the same physical network.
+Also, certain hosts cannot send SSH packets.
+A refinement of the isolation problem is assuring that the content of the packets sent from certain hosts cannot reach
+certain hosts.
+Such a violation can occur for example when proxies are inserted.
+
+We believe that network isolation requirements can be easily specified by network administrators~\cite{Congress}.
+Furthermore, they are similar to memory safety in the sense that violation of network isolation can actually be the consequence
+of a logical error in the implementation.
+
+\subsubsection{Misconfiguration Errors}
+
+
+\subsubsection{The Complexity of Checking Network Correctness}
+We now address the question of checking the correctness of network of middleboxes.
+We begin with an obvious consequence of Rice Theorem:
+\begin{theorem}
+\begin{Name}Undecidability of network correctness\end{Name}
+Consider a fixed topology of middleboxes.
+Also assume that the semantics of every middlebox is expressed in Turing Complete programming language.
+Then, it is undecidable to check any non-trivial property of networks, e.g., network isolation.
+\end{theorem}
+
+We are currently working on a programming language for specifying abstract middleboxes which allows to algorithmically check
+interesting network properties including network isolation.
+Despite this theorem, there may exist restricted programming languages for expressing the abstract effects of many mddleboxes that allows to algorithmically check many interesting
+properties such as absence of loops and packet isolation.
+
+\subsubsection{Correctness Preserving Transformations and Parametric Topologies}
+It may be possible to show that certain correctness properties are preserved by the addition of certain middleboxes in certain ways.
+For example, we may want show that the insertion of certain kinds of middleboxes e.g., WAN cannot lead to new violations of network isolation.
+This will be very nice as it will give principles for changing network topologies.
+Another open question is can one verify a parametric network of middleboxes?
+For example, the Azure network seems to be built out many parallel paths for scalability.
+Can we verify one path and then show that there are no interaction?

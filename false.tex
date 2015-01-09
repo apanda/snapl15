@@ -1,0 +1,92 @@
+\section{Common Myths about Networks and SDN Verification}
+
+We next highlight some common myths about SDN networks and contrast them with the reality of today's networks.
+
+\medskip{}
+
+{\noindent \bf Myth \#1:} \emph{SDN networks only have controllers and OpenFlow routers, with all complicated (particularly mutable) packet processing done at the controller (e.g., learning switches, firewalls).} The early SDN literature~\cite{gude2008nox, monsanto2013composing} relied on examples where anything expressible using OpenFlow rules was pushed down to routers, while anything more complex was implemented in the controller. Complicated functionality
+included both complex processing or transcoding that could not be performed at routers and simple tasks that required mutability (\eg learning switches and stateful firewalls). However, doing this processing at the controller does not scale and, in reality, middleboxes are used to provide most
+of the processing functions not implementable on switches, and most routers provide some mutable behavior (e.g., learning switch).
+
+{\noindent \bf Myth \#2:} \emph{Centralization, as provided by SDN, is what makes current network verification efforts possible.} Centralization is neither necessary nor sufficient for network verification. {\underline{Not necessary}:} Verification in a network with immutable datapaths only requires being able to access router forwarding state, and current commercial network verification efforts target can do this in legacy networks by using commonly available commands to read this forwarding state. {\underline{Not sufficient}:} Regardless of SDN, current network verification efforts cannot verify networks which have middleboxes with mutable datapaths (which describes almost all real networks).
+
+{\noindent \bf Myth \#3:} \emph{Middleboxes are an aberration that will be eliminated by the rise of SDN.} Quite the opposite is true. Not only are middleboxes here to stay -- as the NFV movement promoting their move to software has gotten significant commercial traction (comparable to or exceeding that of SDN) and configuration efforts like Congress \cite{congress} are treating them as first-class network citizens -- but SDN itself has been evolving to incorporate middleboxes~\cite{scottI2talk}.
+
+{\noindent \bf Myth \#4:} \emph{We should write all network code and configuration in declarative languages, because their use makes verification easy.} While quite useful when dealing with immutable datapaths, declarative languages lose much of their charm in the presence of mutable state and thus are not ideally suited
+for writing middleboxes.
+Decidability is a tricky issue for verification.
+Intuitively, the cost of verification is proportional to the complexity of the program and the required invariant.
+Even without side-effects there are only very few cases in which datalog verification is decidable~\cite{Halevy}.
+The situation gets worth when simple side-effects are introduced~\cite{janos}.
+Declarative languages are also commonly proposed as a mechanism for specifying network configuration~\cite{congress}. While this use might make configuration easier
+it should not be considered a panacea for verification. The decidability problem when analyzing mutable datapaths is primarily a result of the dataplane being
+Turing complete, not configuration complexity.
+
+\medskip
+
+Once one discards these myths, it becomes clear that network verification efforts must directly confront the presence of mutable datapaths. While the approach described here may not be optimal, it is currently the only one that confronts the reality of today's and tomorrow's networks. It is time for taking the next step in network verification, and in the next section we outline some of the challenges that this task poses for our community.
+
+
+\eat{
+\begin{outline}
+\1 SDN networks only have controllers and OpenFlow routers, with all complicated (particularly mutable [make point about complicated and mutable two different things]) processing done at the controller (e.g., learning switches, firewalls).
+    \2 Centralizing it is unscalable, and Middleboxes keep some (all?) mutable processing in the network; an approach already in widespread use
+\1 SDN's centralization makes verification possible
+    \2 Centralization is neither necessary nor sufficient for verification
+    \2 Commercial verification efforts deal with legacy (just read routing state)
+    \2 Centralization not sufficient for middleboxes
+\1 Middleboxes are an abomination that SDN will eliminate
+    \2 Get real: they are widely deployed, essential for security and performance. NFV is outstripping SDN in terms of deployment.
+    \2 Instead, SDN will (and already has) evolve to incorporate middleboxes (see Scott's talk)
+\1 Write all network code and configuration in declarative languages, since declarative $\implies$ decidable checking of properties
+    \2 Not a good way to write middleboxes: Declarative not as useful in the presence of mutable state and side-effects~\cite{Tjgreen}.
+        \3 State mutation is imperative in nature and control flow of a program specific ordering and such
+        \3 Hard to call out to imperative code, etc. none of the existing work in building middleboxes is easily adaptable.
+    \2 Perhaps reasonable for specifying network configuration~\cite{congress} but does not help with verification with mutable datapaths
+        \3 Dataplane is Turing complete (as opposed to OpenFlow), controller complexity has nothing to do with undecidability
+        \3 Use it if it works for you, not a magic bullet.
+\end{outline}
+}
+% \begin{description}
+% \item [Myth] The only options for packet handling are reactive and proactive.
+% \item [Reality]  Reactive is usually not an option and proactive may not be powerful enough. Middleboxes compliments the two and is/will be widespread.
+% \end{description}
+
+% \begin{description}
+% \item [Myth] Centralized solutions can scale well in networks by periodically installing rules.
+% \item [Reality] Middleboxes enable scalability while allowing complex distributed functionality using mutable states.
+% \end{description}
+
+% \begin{description}
+% \item [Myth] SDN opens up the possibility for network verification.
+% \item [Reality] The OpenFlow drastically simplifies network verification but it is not realistic and thus any verification effort which can \textbf{only} handles
+% OpenFlow has limited applicability.
+% \end{description}
+
+
+% \begin{description}
+% \item [Myth] Learning switches and statful firewalls need to be implemented in the controller.
+% \item [Reality] Learning switches are some of the simplest and most common dataplane elements and are not normally implemented using a controller. A stateful
+% firewall is a very common middlebox.
+% \end{description}
+
+% \begin{description}
+% \item [Myth] The use of declarative languages renders network verification problems decidable.
+% \item [Reality] . Declarative programming languages have been used to effectively express network policies in languages like Nlog~\cite{Nlog},
+% Flowlog~\cite{flowlog}, NDLog~\cite{}, NetCore~\cite{monsanto2012compiler} and have also been recently used to describe network configuration~\cite{Congress}.
+% However, these languages loose their charm in the presence of side-effects and mutable state~\cite{Tjgreen}.
+% State mutation is imperative by nature and the control flow of a program is used to specify how these updates are processed. Specifying state updates
+% using a declarative language quickly becomes counterproductive as a result.
+% Furthermore, even simple updates result in a Turing complete language~\cite{Janos}, thereby preventing the compiler from handling
+% \textbf{all} programs. Further, calling imperative code from declarative programming is challenging and further prevents optimization and runtime checking.
+% Finally, we note that these languages lack mechanisms for modularity such as procedures, modules, packages, and classes which are
+% heavily used in building middleboxes and complex network code.
+% \end{description}
+
+% \begin{description}
+% \item [Myth] Middleboxes are abomination
+% \item [Reality] Middleboxes are necessity. Half of the network;
+% Solving real and pressing problems;
+% Needs that are not likely to go away;
+% Enable local functionality enhancements~\cite{Riverved}
+% \end{description}

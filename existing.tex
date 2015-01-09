@@ -1,0 +1,56 @@
+\section{Implications of State}
+\label{sec:stateful}
+\eat{
+\begin{outline}
+\1 Previous approaches bad
+    \2 Models cannot easily account for state
+    \2 Hard to use fuunctional and declarative stuff for stateful networks
+\1 Must resort to some form of model checking
+    \2 Not feasible
+        \3 Large code base
+        \3 Many middleboxes
+\end{outline}}
+
+
+\eat{\fixme{SDN inspired model}\notepanda{kind of done, eliminate once fixed}
+Verifying computer networks has generated a lot of interest in the  verification community, recent work such as Header-Space
+Analysis (HSA)~\cite{kazemian2013real}, Veriflow~\cite{}, Frenetic~\cite{guha2013machine},  NetKAT~\cite{anderson2014netkat}, FlowLog~\cite{flowlog} have
+presented techniques and tools for verifying the correctness of networks. These efforts have been informed by the early SDN literature, and assume that the
+control-plane
+is written using Turing complete languages executed on traditional computers, while the data plane is composed of a collection of relatively simple stateless
+switches. }
+\fixme{Not sure if this should be here, or presented at all, but in case we wanted to clarify the switch model}
+Any processing that cannot be performed by dataplane switches is handled by the controller. Switches
+are programmed by specifying a
+forwarding table, where each row specifies a match (indicating a class of packets to which an entry applies) and a set of actions.
+Switch actions are limited to forwarding packets (\ie send the packet a particular way), dropping packets (\ie choose to not forward packets) and
+some limited mutation of the
+packet header. On receiving a packet the switch uses the packet header to index the forwarding table and applies the specified set of actions.
+Matches and actions depend only on the packet under consideration, \ie switches are stateless. Stateful processing in this model is performed at the
+controllers, which receive any packets for which a switch does not have a forwarding entry.
+
+\fixme{Some of this should move to section 4/5}
+\fixme{Dataplanes stateful}
+In reality, network dataplanes are more complicated: they commonly include a variety of stateful elements called middleboxes. Middleboxes
+are dataplane elements implemented using general purpose computers (and programmed in C or other Turing complete languages) used to provide functionality not
+expressible in switches. Middleboxes are used to improve network performance, security and add new features. Implementing such features in the dataplane is
+essential for scalability: a datacenter network can have as many as 500k new flows every second~\cite{benson2010network} while a controller can only handle about
+$5000-8000$ new  flows a second~\cite{}. Middleboxes are both common in the network (a recent study~\cite{sherry2012making} reports as many middleboxes as routers
+in a network) and a common source of errors in the network~\cite{potharaju2013demystifying}: middlebox misconfigurations account for over $40\%$ of all major
+incidents in networks. Directly using tools like HSA and NetKAT in such stateful networks is untenable: the rate of churn is too great to scale verification
+in this manner. Further, naively extending these techniques to reason about state (instead of working on snapshots) renders their decision procedures undecidable.
+Decision procedures for stateful networks must include techniques to handle unbounded sequences of packets and the state resulting from them and none of the
+existing literature includes such techniques.
+
+\fixme{Some of this should move to section 4/5}
+\notepanda{Claim 8}
+\fixme{Declarative languages don't work}
+%% Start positive
+De
+These languages do not require programmers to specify a program's control flow, thus simplifying specification of stateless programs, enabling efficient
+interpretation and simplifying runtime checking.
+
+%% Where it breaks?
+
+Therefore, both existing verification tools and network programming languages are insufficient once we move to stateful data paths. Modifying these to account
+for state is non-trivial and existing tools hit a dead-end in the presence of stateful networks.
