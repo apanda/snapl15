@@ -1,21 +1,22 @@
 \section{Network-Wide Verification}
 \label{sec:modelnet}
 
-Modeling of individual middleboxes is only the first step; our ultimate goal is to veryify network-wide invariants in a network containing middleboxes and routers.
+Modeling of individual middleboxes is only the first step; our ultimate goal is to verify network-wide invariants in a network containing middleboxes and routers.
 There are numerous technical challenges (such as how to deal with loops), but in this short position paper we focus on the most challenging one: how can we feasibly perform verification in very large networks (containing on the order of thousands of middleboxes and routers)? To see why this is hard, consider the case of an isolation invariant (packets from host A cannot reach host B) in a network with many middleboxes. Since middlebox behavior depends not just on their configuration but on the packet history they've seen (since their datapath is mutable), verifying that this invariant holds, even if we ignore the possibility of packet loops,
-involves checking that there is no sequence of packets --- involving packets sent from anywhere in the network --- which includes a packet from host A reaching host B.
+involves checking that there is no sequence of packets --- involving packets sent from anywhere in the network at any time --- which includes a packet from host A reaching host B.
 
 
-Without additional assumptions, this is not feasible. However, we note that the most common classes of middleboxes have an important property: the handling of a packet from host A to host B depends only on the sequence of packets (seen by the middlebox) between hosts A and B. That is, many mutable datapaths exhibit a useful kind of locality.
+Without additional assumptions, this is not feasible as the forwarding of packets from host A to host B can arbitrarily depend on other hosts (e.g., on whether some other host C previously sent packets to another host D). However, we note that the most common classes of middleboxes have an important property: the handling of a packet from host A to host B depends only on the sequence of packets (seen by the middlebox) between hosts A and B. That is, many mutable datapaths exhibit a useful kind of locality.
 For instance, in IP
 firewalls, the middlebox tracks established connections, and allows packets to pass if they are either explicitly permitted by
 policy or belong to an established connection. A connection between host A and B can only be established by host A and B. We therefore do not need to consider the
-actions of any other hosts in the network. We call such middleboxes RONO (Rest-Of-Network Oblivious) middleboxes. RONO is not a rare property; in fact, most middleboxes (including firewalls, WAN optimizers, load balancers, and others) can be configured to be RONO (e.g., caches are RONO if they support ACLS).  Moreover, one can verify whether a middlebox is RONO by statically analyzing its abstract model.
+actions of any other hosts in the network. We call middleboxes whose behavior for a pair of hosts depends only on the traffic sent between these hosts ``RONO (Rest-Of-Network Oblivious) middleboxes''. See Section~\ref{sec:formal} for a formal definition of RONO. RONO is not a rare property; in fact, most middleboxes (including firewalls, WAN optimizers, load balancers, and others) are RONO.  Moreover, one can verify whether a middlebox is RONO by statically analyzing its abstract model.
 
 
-Note that the composition of RONO middleboxes is also RONO.  As a result, in a network containing only RONO
+Note that in many practical cases, 
+the composition of RONO middleboxes is also RONO.  As a result, in a network containing only RONO
 middleboxes we can verify reachability properties on a small subset of the network (the path between two hosts) and these properties would equivalently hold in
-the context of the wider network. We have leveraged this fact to verify correctness of a 30,000 middlebox network in under two minutes.
+the context of the wider network. We have leveraged this fact to verify correctness of a network containing 30,000 middleboxes in under two minutes.
 
 
 \eat{

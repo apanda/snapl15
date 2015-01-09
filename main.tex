@@ -13,7 +13,7 @@
 \newcommand{\eat}[1]{}
 \newcommand{\allnotes}[1]{}
 % To make the FIXMEs go away, comment out this line...
-\renewcommand{\allnotes}[1]{\textit{#1}}
+%\renewcommand{\allnotes}[1]{\textit{#1}}
 \newcommand{\fixme}[1]{\allnotes{\bf\textcolor{red}{[#1]}}}
 \newcommand{\notescott}[1]{\allnotes{\textcolor{blue}{[Scott: #1]}}}
 \newcommand{\noteori}[1]{\allnotes{\textcolor{green}{[Ori: #1]}}}
@@ -74,6 +74,11 @@
 % \DOI{10.4230/LIPIcs.xxx.yyy.p}% to be completed by the volume editor
 % Editor-only macros::end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
+\setlength{\abovedisplayskip}{5pt}
+\setlength{\belowdisplayskip}{5pt}
+\setlength{\abovedisplayshortskip}{2pt}
+\setlength{\belowdisplayshortskip}{2pt}
+
 \maketitle
 % \begin{abstract}
 % \end{abstract}

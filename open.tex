@@ -1,32 +1,25 @@
-\section{Open Problems for Network Verification}
+\section{Some Open Problems in Network Verification}
+%\notepanda{We should consider changing the section title, Open Problems sounds very lofty.}
 Finally, we present some open problems that we have encountered while looking at how to verify mutable dataplanes. This list is not 
 exhaustive, but is rather an attempt to list the first set of hurdles that need to be crossed given this new network verification agenda.
 
-\textbf{Decidability of Verification} 
-When processing a packet, a middlebox might access potentially unbounded state. This prevents the use
+\noindent\textbf{Decidability of Verification} When processing a packet, a middlebox might access potentially unbounded state. This prevents the use
 of finite-state model checking, and other verification techniques are undecidable for general programs in this class. We are
-currently working on a limited programming language that is rich enough to specify all exiting middleboxes, while simultaneously
-enabling verification of some interesting network properties, including reachability properties.
+currently working on a limited programming language that is rich enough to specify all existing middleboxes and to enable verification of some interesting network properties, including reachability properties. What other network properties can
+be verified in a decidable manner remains an important open problem.
 
-% Our abstract models for middleboxes such Firewall an IDSs have infinite state.
-% Therefore, in general it may be undecidable to check properties like network isolation.
-% We are currently working on a programming language for specifying abstract middleboxes, which allows to algorithmically check
-% interesting network properties, including network isolation.
-
-
-\textbf{Specification}
-Specifying verification properties and middleboxes remains an open question in general. While we have provided some tools
-that allow us to specify and check reachability properties, extending this to other invariants, for example performance based
-invariants remains challenging. How middleboxes and properties are specified also has a huge impact on verification time and
+\noindent\textbf{Specification} While we have provided some tools
+that allow us to specify and check reachability properties; extending this to other invariants, for example performance-based
+invariants is challenging. How middleboxes and properties are specified also has a huge impact on verification time and
 decidability. Therefore, it is crucial to pick specifications that are rich enough to permit operators to express interesting and
 useful properties, yet narrow enough to permit automated reasoning.
 
-\textbf{Correctness Preserving Transformations and Parametric Toplogies}
-It might be possible to extend some of our results on compositional reasoning to show that the addition of certain types of middleboxes
-can never affect some class of invariants. We know this is true for some middleboxes in reality, the addition of a stateless firewall
+\noindent\textbf{Correctness-Preserving Transformations} It might be possible to extend some of our results on compositional reasoning to show that the addition of certain types of middleboxes
+can never affect some class of invariants. We know this is true for some middleboxes in reality, e.g., the addition of a stateless firewall
 can never affect an isolation invariant (though it might invalidate some reachability invariants). Developing a theory for when this 
 holds might be useful in developing techniques to help simplify network changes. 
 
-Compositional verification similarly hints at the fact that we might be able to design some ``parametric'' topologies, where one can provably
-show that a change to one network path cannot possibly affect another. It is easy to see that this is easily achieved for stateless datapaths.
-However, the complexity of what can built using parametric toplogies, when mutable data paths are used remains an open question.
+\textbf{Verifying Parametric Topologies}
+Some network topologies are parametric. For example, one can generate a fat-tree topology~\cite{al2008scalable} for a given datacenter
+size. It is possible that we can leverage compositional verification techniques to verify properties independent of the parameter. This
+would both speed-up verification and perhaps provide insights into the kinds of networks that are easily evolvable.
