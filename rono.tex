@@ -18,8 +18,8 @@ model ids (p: Packet) = {
 \end{lstlisting}
 
 % \subsection{Verification Problem}
-DeMillo et al.~\cite{popl:DeMilloLP77} previously argued that specifying the desired behavior of a program (or network) is hard, and is a show-stopper for
-verification. Indeed, the lack of a precise specification is a major problem for program and network verification. 
+DeMillo et al.~\cite{popl:DeMilloLP77} previously argued that specifying the desired behavior of a program (or network) is hard. 
+Indeed, the lack of a precise specification is a major problem for program and network verification. 
 
 The primary function of networks is to allow hosts to communicate with each other. Reachabality, the property that a certain class of packets sent from host $A$ can reach host $B$, and its converse, isolation, are fundamental to networks: all useful networks must satisfy some set of reachability properties and their verification is thus universally important. In the rest of this section we limit our discussion to Reachability invariants.
 
@@ -40,7 +40,7 @@ $Predicate$ in the definitions above is specified using the same abstractions us
 header fields (source, destination, etc.) or in terms of the abstraction provided by a middlebox Oracle (\S\ref{sec:mbmodel}). For example, a property
 saying no SSH traffic can reach a server $d$ can be expressed as
 \begin{align}
-\forall s\in \text{Node}: \Box (Send(s, p) \land ssh(p) \implies \Box(\neg Recv(d, p))) \label{eq:isossh}
+\forall s\in \text{Node}, p\in \text{Packet}: \Box (Send(s, p) \land ssh(p) \implies \Box(\neg Recv(d, p))) \label{eq:isossh}
 \end{align}
 
 where $ssh(p)$ returns true if an Oracle classifies the packet as belonging to an SSH connection.
@@ -113,8 +113,8 @@ Network Oblivious middleboxes (\S\ref{sec:modelnet}), middleboxes whose behavior
 More formally, we define the restriction $h|_{(A, B)}$ of a packet history $h\in P^*$ to be the subsequence of $h$ containing only those packets that were
 sent between host $A$ and $B$. We define a middlebox $m$ to be RONO if and only if
 \begin{align*}
-f(p, h) = f(p, h|_{(A, B)}) &\ \  \forall p: p.src = A \land p.dest = B \text{   and}\\
-f(p, h) = f(p, h|_{(A, B)}) &\ \  \forall p: p.src = B \land p.dest = A
+\forall p: p.src = A \land p.dest = B &\ \  f(p, h) = f(p, h|_{(A, B)}) \text{   and}\\
+\forall p: p.src = B \land p.dest = A &\ \ f(p, h) = f(p, h|_{(A, B)})
 \end{align*}
 
 Not all compositions of RONO middleboxes are themselves RONO. In~\cite{corr:PandaLASS14}, we have identified conditions where a network of RONO middleboxes
