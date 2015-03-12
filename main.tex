@@ -7,10 +7,10 @@
 %for british hyphenation rules use option "UKenglish", for american hyphenation rules use option "USenglish"
 % for section-numbered lemmas etc., use "numberwithinsect"
 
-\usepackage{microtype, xcolor, xspace, cite, units,amsmath}%if unwanted, comment out or use option "draft"
+\usepackage{microtype, xcolor, xspace, cite, units,amsmath,caption}%if unwanted, comment out or use option "draft"
 \usepackage{changebar}
 % \input{plmacros}
-
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
 \newcommand{\eat}[1]{}
 \newcommand{\allnotes}[1]{}
 % To make the FIXMEs go away, comment out this line...
@@ -75,5 +75,6 @@ Network verification has recently gained popularity in the programming languages
 \input{false}
 \input{rono}
 \input{open}
+\input{acknowledgments}
 \bibliography{snapl}
 \end{document}

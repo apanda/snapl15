@@ -76,11 +76,12 @@ $m(p, h) \doteq \left\{p\right\}$. Similarly a simple firewall, $f$ (whose decis
 % \subsection{Composing Middleboxes}
 Ideally, we would like to be able to reason about the network \emph{compositionally}, \ie the correctness of the network should follow from
 the correctness of smaller, simpler components. Compositional reasoning can reduce the cost of verification and enable incremental verification
-of changes in the network. Compositionality has been important for making verification tractable in other domains, for instance the use of
+of changes in the network. Compositionality also allows us to potentially verify invariants in a much 
+Compositionality has been important for making verification tractable in other domains, for instance the use of
 rely-guarantees~\cite{tse:MisraC81,ifip:Jones83}, was important for enabling verification of concurrent programs.
 
 We start by defining what it means to be able to compositionally verify a network. Let us
-define the union of two networks $N_1$ and $N_2$ in the natural way, \ie $N_1\cup N_2$ contains the union of all nodesand links in each of $N_1$ and $N_2$.
+define the union of two networks $N_1$ and $N_2$ in the natural way, \ie $N_1\cup N_2$ contains the union of all nodes and links in each of $N_1$ and $N_2$.
 Consider two networks: $N_1$, where property $P_1$ holds (represented as $N_1\models P_1$); and $N_2$, where property $P_2$ holds. We can compose the proofs
 for properties $P_1$ and $P_2$ if and only if  both $P_1$ and $P_2$ hold for $N_1 \cup N_2$. More formally, we can verify properties $P_1$ and $P_2$
 compositionally for network $N$ if for any $N_1 \subset N$ and $N_2\subset N$
@@ -90,7 +91,7 @@ N_1 \models P_1,  N_2\models P_2\\
 (N_1 \cup N_2) \models P_1\land P_2
 \end{align*}
 
-\begin{figure}
+\begin{figure}[t]
 \centering
 \includegraphics[width=0.9\textwidth]{figures/rono_example.pdf}
 \caption{Example where networks are not composable with respect to reachability properties.}
@@ -101,20 +102,36 @@ N_1 \models P_1,  N_2\models P_2\\
 Generally, one cannot perform compositional verification of reachability properties. For instance,
 consider the example in Figure~\ref{fig:compose_fail}. The cache in this example records all requests to and the corresponding responses from $S$.
 On receiving a new request,  the cache checks to see if it has previously recorded a response for this request, in which case it returns the saved response;
-otherwise the cached forwards the request, unmodified, to the firewall.
- The firewall drops all requests sent from $A$ to $S$, but otherwise forwards all other requests and responses unmodified.
-In network $N_1$, $A$ can never receive a response from $S$ (thus is isolated). However in the composed network $N_1\cup N_2$, if $B$ sends a request $r$ and
-receives response $r'$ from $S$, then $A$ can also request $r$ and receive $r'$.
+otherwise the cached forwards the request, unmodified, to the firewall. The firewall drops all requests sent from $A$ to $S$, but otherwise forwards all other requests and responses unmodified. In network $N_1$, $A$ can never receive a response from $S$ (thus is isolated). However in the composed network $N_1\cup N_2$, if $B$ sends a request $r$ and receives response $r'$ from $S$, then $A$ can also request $r$ and receive $r'$.
 
+\cbstart
 One key insight is that despite being impossible in general, there exists an important subset of networks where compositional reasoning can be used
-to verify reachability properties. These networks contain only Rest-Of
-Network Oblivious middleboxes (\S\ref{sec:modelnet}), middleboxes whose behavior for a pair of hosts depends only on the traffic sent between these hosts.
-More formally, we define the restriction $h|_{(A, B)}$ of a packet history $h\in P^*$ to be the subsequence of $h$ containing only those packets that were
-sent between host $A$ and $B$. We define a middlebox $m$ to be RONO if and only if
+to verify reachability properties. We have found that networks which contain only a special class of middleboxes, Rest-of-Network Oblivious (RONO) middleboxes (\S\ref{sec:modelnet}) are often amenable to compositional verification. A RONO middlebox is one whose forwarding behavior (which is all we care about for reachability and isolation) for a pair of hosts depends only on the traffic sent between these hosts. More formally, define the restriction $h|_{(A, B)}$ of a packet history $h\in P^*$  to be the largest subsequence of $h$ containing only those packets that were sent between host $A$ and $B$; we then define a middlebox $m$ to be RONO if and only if
 \begin{align*}
 \forall p: p.src = A \land p.dest = B &\ \  f(p, h) = f(p, h|_{(A, B)}) \text{   and}\\
-\forall p: p.src = B \land p.dest = A &\ \ f(p, h) = f(p, h|_{(A, B)})
+\forall p: p.src = B \land p.dest = A &\ \ f(p, h) = f(p, h|_{(A, B)}) \numberthis \label{eq:rono}
 \end{align*}
+Similarly, we define a network to be RONO, if the entire network's semantics can be described using a single abstract semantic function that meets the conditions in Equation~\ref{eq:rono}.
 
-Not all compositions of RONO middleboxes are themselves RONO. In~\cite{corr:PandaLASS14}, we have identified conditions where a network of RONO middleboxes
-supports compositional verification.\fixme{Should include information about RONO and eRONO, and also show an example where pure RONO composition fails.}
+\begin{figure*}[t]
+\centering
+\subfloat[]{
+\includegraphics[width=0.3\textwidth]{figures/rono_composition_bad.pdf}
+\label{fig:rono_all}
+}
+\subfloat[]{
+\includegraphics[width=0.3\textwidth]{figures/rono_composition_bad_a.pdf}
+\label{fig:rono_a}
+}
+\subfloat[]{
+\includegraphics[width=0.3\textwidth]{figures/rono_composition_bad_b.pdf}
+\label{fig:rono_b}
+}
+
+\caption{Example where the composition of two RONO middleboxes is not RONO.}
+\label{fig:rono_fail}
+\vspace{-0.15in}
+\end{figure*}
+
+Surprisingly, we find that not all networks that contain only RONO middleboxes are RONO, \ie RONO is not closed under composition. For example, consider the network in Figure~\ref{fig:rono_fail}. The firewall in this example is stateful and is configured to allow \emph{no communication} between $A$ and $S_1$. Furthermore, the firewall configuration allow $A$ and $S_2$ to communicate, provided $A$ establishes the connection, \ie sends the first packet. The port mirror is configured to duplicate and send all packets received from the firewall to both $S_1$ and $S_2$. Beyond these policies, both the firewall and port mirror forward traffic as expected (\ie they forward packets towards their intended destination). In this example, the port mirror is stateless, and hence trivially RONO according to Equation~\ref{eq:rono}. The behavior of the stateful firewall is also RONO. However, the composition of these two middleboxes is not RONO. When we consider just $S_1$ and $A$ in isolation (Figure~\ref{fig:rono_a}), \ie a case where $S_2$ neither sends nor receives any packets, $A$ and $S_1$ cannot communicate, since all packets between them are dropped at the firewall. However, when we remove this restriction, \ie allow $S_2$ to send or receive packets, we find that $A$ can in fact communicate with $S_1$: $S_2$ needs to first send a packet establishing a connection with $A$, any subsequent responses sent by $A$ are allowed through the firewall, and duplicated so they are received by both $S_1$ and $S_2$. Thus, the network as a whole is not RONO, despite containing only RONO middleboxes and end hosts.
+\cbend
