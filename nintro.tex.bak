@@ -1,8 +1,0 @@
-\section{Introduction}
-
-Software defined networking (SDN) is an emerging architecture for
-operating and managing computer networks, fueled by adoption by major
-technology companies~\cite{SIGCOMM:Jain13}.
-SDN spawns a lot of recent interest in the network, programming language and the verification communities in order to facilitate effective construction of
-reliable networks (e.g., \cite{FlowLog,monsanto2012compiler,khurshid2012veriflow,kazemian2012header,Verificare,FMACAD:SNM13,VeiConMajumdar:2014}).
-These works assume
