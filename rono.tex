@@ -8,7 +8,6 @@ In this section, we sketch a concrete way to formalize and prove interesting  pr
                     morekeywords={oracle, model, when, default, state, forward},belowskip=-0.1in]
 oracle suspicious? (packet: Packet) : Boolean;
 
-
 model ids (p: Packet) = {
   when suspicious?(p) =>
       forward {}
@@ -118,4 +117,4 @@ sent between host $A$ and $B$. We define a middlebox $m$ to be RONO if and only 
 \end{align*}
 
 Not all compositions of RONO middleboxes are themselves RONO. In~\cite{corr:PandaLASS14}, we have identified conditions where a network of RONO middleboxes
-supports compositional verification.
+supports compositional verification.\fixme{Should include information about RONO and eRONO, and also show an example where pure RONO composition fails.}
