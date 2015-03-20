@@ -53,7 +53,7 @@ Verifying the isolation property in Equation~(\ref{eq:isossh}) therefore require
 As stated earlier, we model a middlebox as an oracle and a simple abstract model. The Oracle provides abstractions that are used to specify the
 properties being checked. We expect models for middleboxes (which include both an oracle and a generic model) to be specified
 using a constrained programming language. Listing~\ref{list:ids} shows an example of such a specification
-for an intrusion detecion system (IDS). The IDS oracle provides one abstraction, \texttt{suspicious?}, defined in the first line. The abstract model is
+for an intrusion detection system (IDS). The IDS oracle provides one abstraction, \texttt{suspicious?}, defined in the first line. The abstract model is
 defined in Lines 4 -- 9 and uses this abstraction. First we check to see if the packet is suspicious (the Oracle's decision here might be based on what
 packets it has seen previously), and  drop the packet (Line 6) or forward the packet (Line 9) depending on the value returned by the Oracle.
 % \notepanda{End of where we would cut until}
