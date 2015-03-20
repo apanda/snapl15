@@ -10,16 +10,6 @@
 \usepackage{microtype, xcolor, xspace, cite, units,amsmath,caption}%if unwanted, comment out or use option "draft"
 \usepackage{changebar}
 \newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
-\newcommand{\eat}[1]{}
-\newcommand{\allnotes}[1]{}
-% To make the FIXMEs go away, comment out this line...
-%\renewcommand{\allnotes}[1]{\textit{#1}}
-\newcommand{\fixme}[1]{\allnotes{\bf\textcolor{red}{[#1]}}}
-\newcommand{\notescott}[1]{\allnotes{\textcolor{blue}{[Scott: #1]}}}
-\newcommand{\noteori}[1]{\allnotes{\textcolor{green}{[Ori: #1]}}}
-\newcommand{\notemooly}[1]{\allnotes{\textcolor{purple}{[Mooly: #1]}}}
-\newcommand{\notekaterina}[1]{\allnotes{\textcolor{gray}{[Katerina: #1]}}}
-\newcommand{\notepanda}[1]{\allnotes{\textcolor{cyan}{[Panda: #1]}}}
 \newcommand{\eg}{{\it e.g.,}\xspace}
 \newcommand{\ie}{{\it i.e.,}\xspace}
 
@@ -43,7 +33,7 @@
 
 \subjclass{C.2.6 Internetworking, F.3.1 Specifying and Verifying and Reasoning about Programs}
 % mandatory: Please choose ACM 1998 classifications from http://www.acm.org/about/class/ccs98-html . E.g., cite as "F.1.1 Models of Computation".
-\keywords{Middleboxes, Network Verification, Stateful Dataplane}% mandatory: Please provide 1-5 keywords
+\keywords{Middleboxes, Network Verification, Mutable Dataplane}% mandatory: Please provide 1-5 keywords
 % Author macros::end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -62,8 +52,6 @@
 \begin{document}
 
 \maketitle
-% \begin{abstract}
-% \end{abstract}
 \begin{abstract}
 Network verification has recently gained popularity in the programming languages and verification community. Much of the recent work in this area has focused on verifying the behavior of simple networks, whose actions are dictated by static, immutable rules configured ahead of time. However, in reality, modern networks contain a variety of middleboxes, whose behavior is affected both by their configuration and by mutable state updated in response to packets received by them. In this position paper we critically review recent progress on network verification, propose some next steps towards a more complete form of network verification, dispel some myths about networks, provide a more formal description of our approach, and end with a discussion of the formal questions posed to this community by the network verification agenda.
 \end{abstract}
